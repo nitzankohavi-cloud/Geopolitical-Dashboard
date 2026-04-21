@@ -18,51 +18,49 @@
        SECTION A — DESIGN TOKENS v3
        Warm High-Fidelity: Alabaster · Sapphire · Emerald · Rust
     ════════════════════════════════════════════════════════════════════ */
-    :root {
-      /* Backgrounds */
-      --bg-page:        #FAFAF9;   /* stone-50  — warm alabaster ground */
-      --bg-card:        #FFFFFF;   /* pure white card surfaces */
-      --bg-muted:       #F5F5F4;   /* stone-100 — badge fills, hover states */
+  :root {
+      /* Backgrounds — Premium Alabaster */
+      --bg-page:        #FAFAF9;
+      --bg-card:        #FFFFFF;
+      --bg-muted:       #F5F5F4;
 
-      /* Text — warm charcoal scale */
-      --tx-1:           #292524;   /* stone-900 — primary data & titles */
-      --tx-2:           #78716C;   /* stone-500 — labels, secondary copy */
-      --tx-3:           #A8A29E;   /* stone-400 — tertiary, ghost text */
+      /* Text — Warm Charcoal */
+      --tx-1:           #292524;
+      --tx-2:           #57534E;
+      --tx-3:           #A8A29E;
 
-      /* Accent — Sapphire / Denim */
-      --accent:         #2563EB;   /* blue-600 — sparklines, active states, CTA */
-      --accent-dim:     #1D4ED8;   /* blue-700 — hover pressed */
-      --accent-fill:    #EFF6FF;   /* blue-50  — sapphire tint fill */
-      --accent-border:  #BFDBFE;   /* blue-200 — sapphire border */
+      /* Accent — Elegant Denim/Sapphire (No loud neon blue) */
+      --accent:         #2B4A6F;
+      --accent-dim:     #1C334E;
+      --accent-fill:    #F0F4F8;
+      --accent-border:  #D1DCE8;
 
-      /* Data signals */
-      --up:             #059669;   /* emerald-600 */
-      --up-fill:        #ECFDF5;   /* emerald-50 */
-      --up-border:      #6EE7B7;   /* emerald-300 */
-      --dn:             #DC2626;   /* red-600 */
-      --dn-fill:        #FEF2F2;   /* red-50 */
-      --dn-border:      #FCA5A5;   /* red-300 */
-      --nt:             #A8A29E;   /* neutral — stone-400 */
+      /* Data signals — Muted & Editorial */
+      --up:             #4B6F5A;   /* Muted Sage Green */
+      --up-fill:        #F0F5F2;
+      --up-border:      #C2D6CA;
+      --dn:             #9E4747;   /* Muted Brick Red */
+      --dn-fill:        #FDF4F4;
+      --dn-border:      #E6CACA;
+      --nt:             #A8A29E;
       --nt-fill:        #F5F5F4;
 
       /* Borders */
-      --bd:             #E7E5E4;   /* stone-200 — ultra-fine default */
-      --bd-md:          #D6D3D1;   /* stone-300 — hover / emphasis */
+      --bd:             #E7E5E4;
+      --bd-md:          #D6D3D1;
 
-      /* Typography */
+      /* Typography & Radii */
       --sans: 'Inter', system-ui, -apple-system, sans-serif;
       --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Mono', monospace;
-
-      /* Radii */
       --r-sm:  5px;
       --r-md:  8px;
       --r-lg:  12px;
 
-      /* Elevation — minimal, warm-tinted */
+      /* Elevation - Ultra soft shadows */
       --sh-card:  0 1px 2px rgba(41,37,36,.04), 0 0 0 1px var(--bd);
       --sh-hover: 0 4px 16px rgba(41,37,36,.09), 0 1px 3px rgba(41,37,36,.05), 0 0 0 1px var(--bd-md);
-      --sh-radar: 0 1px 3px rgba(37,99,235,.07), 0 0 0 1px var(--accent-border);
-      --sh-radar-hover: 0 6px 20px rgba(37,99,235,.12), 0 0 0 1px var(--accent-border);
+      --sh-radar: 0 1px 3px rgba(43,74,111,.07), 0 0 0 1px var(--accent-border);
+      --sh-radar-hover: 0 6px 20px rgba(43,74,111,.12), 0 0 0 1px var(--accent-border);
     }
 
     /* ════════════════════════════════════════════════════════════════════
@@ -1266,13 +1264,12 @@
     return `$${v}`;
   }
 
-  /* Delta chip — monospaced, colour-coded, directional symbol */
+ /* Delta chip — Elegant neutral colors to prevent Yes/No bias */
   function mkDelta(d) {
-    if (d > 0.001)  return `<span class="delta delta--up">↑ +${(d * 100).toFixed(1)}%</span>`;
-    if (d < -0.001) return `<span class="delta delta--dn">↓ ${(d * 100).toFixed(1)}%</span>`;
-    return `<span class="delta delta--nt">—</span>`;
+    if (d > 0.001)  return `<span class="delta" style="color: var(--accent); background: var(--accent-fill);">↑ +${(d * 100).toFixed(1)}%</span>`;
+    if (d < -0.001) return `<span class="delta" style="color: var(--tx-2); background: var(--bg-muted);">↓ ${(d * 100).toFixed(1)}%</span>`;
+    return `<span class="delta" style="color: var(--nt); background: var(--nt-fill);">—</span>`;
   }
-
   /* Leading outcome helpers */
   function lead(m) {
     const i = m.prices[0] >= m.prices[1] ? 0 : 1;
