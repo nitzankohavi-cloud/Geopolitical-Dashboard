@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geopolitical Global Markets</title>
+
+  <!-- ── Typefaces ────────────────────────────────────────────────────────
+       Inter          →  all UI text, labels, questions, buttons
+       JetBrains Mono →  probabilities, volumes, deltas — tabular-aligned
+  ──────────────────────────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION A — DESIGN TOKENS v3
+       Warm High-Fidelity: Alabaster · Sapphire · Emerald · Rust
+    ════════════════════════════════════════════════════════════════════ */
+    :root {
+      /* Backgrounds */
+      --bg-page:        #FAFAF9;   /* stone-50  — warm alabaster ground */
+      --bg-card:        #FFFFFF;   /* pure white card surfaces */
+      --bg-muted:       #F5F5F4;   /* stone-100 — badge fills, hover states */
+
+      /* Text — warm charcoal scale */
+      --tx-1:           #292524;   /* stone-900 — primary data & titles */
+      --tx-2:           #78716C;   /* stone-500 — labels, secondary copy */
+      --tx-3:           #A8A29E;   /* stone-400 — tertiary, ghost text */
+
+      /* Accent — Sapphire / Denim */
+      --accent:         #2563EB;   /* blue-600 — sparklines, active states, CTA */
+      --accent-dim:     #1D4ED8;   /* blue-700 — hover pressed */
+      --accent-fill:    #EFF6FF;   /* blue-50  — sapphire tint fill */
+      --accent-border:  #BFDBFE;   /* blue-200 — sapphire border */
+
+      /* Data signals */
+      --up:             #059669;   /* emerald-600 */
+      --up-fill:        #ECFDF5;   /* emerald-50 */
+      --up-border:      #6EE7B7;   /* emerald-300 */
+      --dn:             #DC2626;   /* red-600 */
+      --dn-fill:        #FEF2F2;   /* red-50 */
+      --dn-border:      #FCA5A5;   /* red-300 */
+      --nt:             #A8A29E;   /* neutral — stone-400 */
+      --nt-fill:        #F5F5F4;
+
+      /* Borders */
+      --bd:             #E7E5E4;   /* stone-200 — ultra-fine default */
+      --bd-md:          #D6D3D1;   /* stone-300 — hover / emphasis */
+
+      /* Typography */
+      --sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Mono', monospace;
+
+      /* Radii */
+      --r-sm:  5px;
+      --r-md:  8px;
+      --r-lg:  12px;
+
+      /* Elevation — minimal, warm-tinted */
+      --sh-card:  0 1px 2px rgba(41,37,36,.04), 0 0 0 1px var(--bd);
+      --sh-hover: 0 4px 16px rgba(41,37,36,.09), 0 1px 3px rgba(41,37,36,.05), 0 0 0 1px var(--bd-md);
+      --sh-radar: 0 1px 3px rgba(37,99,235,.07), 0 0 0 1px var(--accent-border);
+      --sh-radar-hover: 0 6px 20px rgba(37,99,235,.12), 0 0 0 1px var(--accent-border);
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION B — RESET & BASE
+    ════════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      background: var(--bg-page);
+      color: var(--tx-1);
+      font-family: var(--sans);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /*
+     * .num — applied to every rendered number.
+     * JetBrains Mono + tabular-nums prevents digit jitter during live updates.
+     */
+    .num {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 5rem;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION C — MASTHEAD
+    ════════════════════════════════════════════════════════════════════ */
+    .masthead {
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--bd);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .masthead__eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: 0.3rem;
+    }
+    .masthead__title {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 600;
+      color: var(--tx-1);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .masthead__meta {
+      font-size: 12px;
+      color: var(--tx-3);
+      text-align: right;
+      line-height: 1.7;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION D — SHARED PRIMITIVES
+    ════════════════════════════════════════════════════════════════════ */
+
+    /* Section header row — title + optional rule + optional trailing text */
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .sec-head__title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tx-2);
+      white-space: nowrap;
+    }
+    .sec-head__rule {
+      flex: 1;
+      height: 1px;
+      background: var(--bd);
+    }
+    .sec-head__trail {
+      font-size: 11px;
+      color: var(--tx-3);
+      white-space: nowrap;
+    }
+
+    /* Delta chip — monospaced tabular numbers */
+    .delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: var(--r-sm);
+      white-space: nowrap;
+      line-height: 1.5;
+    }
+    .delta--up   { color: var(--up); background: var(--up-fill); }
+    .delta--dn   { color: var(--dn); background: var(--dn-fill); }
+    .delta--nt   { color: var(--nt); background: var(--nt-fill); }
+
+    /* Category badge */
+    .badge {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: var(--r-sm);
+      background: var(--bg-muted);
+      color: var(--tx-3);
+      border: 1px solid var(--bd);
+      white-space: nowrap;
+    }
+
+    /* Outcome pills */
+    .pill {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 11px;
+      font-weight: 400;
+      padding: 2px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--bd);
+      color: var(--tx-2);
+      background: transparent;
+      white-space: nowrap;
+    }
+    .pill--lead {
+      border-color: var(--up-border);
+      background: #F0FDF4;
+      color: #065F46;
+    }
+
+    /* Stat block (label + value column) */
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .stat__lbl {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+    }
+    .stat__val {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--tx-2);
+    }
+
+    /* Live dot — Sapphire pulse (formerly sage-green) */
+    .live-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: live-pulse 2.2s ease-in-out infinite;
+      vertical-align: middle;
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+    @keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+    /* Intentional empty/loading state */
+    .empty {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--tx-3);
+      padding: 2.5rem 0;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION E — STATE MACHINE: VIEW TRANSITIONS (PRESERVED MECHANICS)
+    ════════════════════════════════════════════════════════════════════ */
+    .views-wrap { position: relative; min-height: 300px; }
+
+    .view {
+      opacity: 0;
+      transform: translateY(7px);
+      transition: opacity 0.24s ease, transform 0.24s ease;
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+      left: 0;
+    }
+    .view--on {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+      position: relative;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION F — DOMESTIC RADAR
+       Persistent section at top of macro view. Israel markets only.
+       Sapphire left-border accent signals highest visual priority.
+    ════════════════════════════════════════════════════════════════════ */
+    .radar-section {
+      margin-bottom: 2.5rem;
+    }
+
+    /* Radar section header — sapphire icon + title */
+    .radar-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .radar-head__left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .radar-head__icon {
+      color: var(--accent);
+      flex-shrink: 0;
+      line-height: 0;
+    }
+    .radar-head__title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .radar-head__sub {
+      font-size: 11px;
+      color: var(--tx-3);
+      white-space: nowrap;
+    }
+    .radar-head__rule {
+      flex: 1;
+      height: 1px;
+      background: var(--accent-border);
+    }
+
+    /* Grid of radar cards */
+    .radar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+      gap: 8px;
+    }
+
+    /* Individual radar card */
+    .radar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-border);
+      border-left: 3px solid var(--accent);  /* sapphire priority indicator */
+      border-radius: var(--r-md);
+      padding: 1rem 1.1rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--sh-radar);
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    .radar-card:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--sh-radar-hover);
+    }
+
+    .radar-card__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+    .radar-card__q {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--tx-1);
+      line-height: 1.45;
+      margin-bottom: 0.55rem;
+    }
+
+    /* Hero probability row in radar card */
+    .radar-card__prob-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.45rem;
+    }
+    .radar-card__prob {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 1.95rem;
+      font-weight: 400;
+      color: var(--tx-1);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .radar-card__prob-sup {
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--tx-3);
+    }
+
+    /* Sparkline container in radar card */
+    .radar-card__spark {
+      height: 34px;
+      width: 100%;
+      margin: 0.3rem 0 0.65rem;
+    }
+    .radar-card__spark svg { width: 100%; height: 100%; overflow: visible; }
+
+    /* Footer stats row */
+    .radar-card__foot {
+      display: flex;
+      gap: 1.1rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid var(--bd);
+    }
+
+    /* Impact badge — shows on top-tier cards */
+    .impact-badge {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-fill);
+      border: 1px solid var(--accent-border);
+      padding: 2px 7px;
+      border-radius: var(--r-sm);
+      white-space: nowrap;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION G — MACRO VIEW: REGION CARDS
+    ════════════════════════════════════════════════════════════════════ */
+    .regions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 8px;
+    }
+
+    .region-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bd);
+      border-radius: var(--r-lg);
+      padding: 1.5rem 1.5rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      box-shadow: var(--sh-card);
+      /* Premium hover lift — ease-out for snappy deceleration */
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    .region-card:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--sh-hover);
+      border-color: var(--bd-md);
+    }
+    .region-card:active { transform: translateY(0); }
+    .region-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Faint monospace watermark index — gives grid visual texture */
+    .region-card__idx {
+      position: absolute;
+      bottom: -0.3rem;
+      right: 1rem;
+      font-family: var(--mono);
+      font-size: 4.5rem;
+      font-weight: 500;
+      color: var(--bd);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: -0.06em;
+    }
+
+    .region-card__count {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: 0.35rem;
+    }
+    .region-card__name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--tx-1);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 1.1rem;
+    }
+    .region-card__divider {
+      width: 22px;
+      height: 1px;
+      background: var(--bd-md);
+      margin-bottom: 1rem;
+    }
+    .region-card__vol-lbl {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: 2px;
+    }
+    .region-card__vol {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--tx-1);
+      letter-spacing: -0.03em;
+      margin-bottom: 1.1rem;
+    }
+    .region-card__hl-lbl {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tx-3);
+      margin-bottom: 3px;
+    }
+    .region-card__hl-q {
+      font-size: 12px;
+      color: var(--tx-2);
+      line-height: 1.5;
+      margin-bottom: 1.4rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* "View Breakdown" CTA — sapphire fill */
+    .region-card__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-fill);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-sm);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      align-self: flex-start;
+      margin-top: auto;
+    }
+    .region-card__cta:hover {
+      background: var(--accent);
+      color: #FFFFFF;
+      border-color: var(--accent);
+    }
+    .region-card__cta::after { content: '→'; font-size: 12px; }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION H — REGION BREAKDOWN VIEW
+    ════════════════════════════════════════════════════════════════════ */
+    .breakdown-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+    .breakdown-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--tx-2);
+      background: var(--bg-card);
+      border: 1px solid var(--bd);
+      border-radius: var(--r-sm);
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: var(--sh-card);
+    }
+    .breakdown-back:hover {
+      color: var(--tx-1);
+      border-color: var(--bd-md);
+      box-shadow: var(--sh-hover);
+    }
+    .breakdown-back::before { content: '←'; }
+
+    .breakdown-region {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 600;
+      color: var(--tx-1);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+    .breakdown-sub {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+      color: var(--tx-3);
+      margin-top: 0.3rem;
+    }
+
+    /* Two-pillar layout */
+    .pillars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    /* Pillar wrapper */
+    .pillar {
+      background: var(--bg-card);
+      border: 1px solid var(--bd);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--sh-card);
+    }
+    .pillar__head {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--bd);
+      background: var(--bg-page);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .pillar__title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tx-2);
+    }
+    .pillar__sub {
+      font-size: 11px;
+      color: var(--tx-3);
+    }
+
+    /* ── Primary Market (Pillar A) ────────────────────────────────────── */
+    .primary {
+      padding: 1.2rem 1.25rem;
+      border-bottom: 1px solid var(--bd);
+    }
+    .primary:last-child { border-bottom: none; }
+
+    .primary__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .primary__prob {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 2.8rem;
+      font-weight: 300;
+      color: var(--tx-1);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      margin-bottom: 0.2rem;
+    }
+    .primary__prob-sup {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--tx-3);
+    }
+    .primary__spark {
+      height: 50px;
+      width: 100%;
+      margin: 0.6rem 0 0.85rem;
+    }
+    .primary__spark svg { width: 100%; height: 100%; overflow: visible; }
+
+    .primary__q {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--tx-1);
+      line-height: 1.45;
+      margin-bottom: 0.7rem;
+    }
+    .primary__pills {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .primary__stats {
+      display: flex;
+      gap: 1.25rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid var(--bd);
+    }
+
+    /* ── Significant Shift row (Pillar B) ─────────────────────────────── */
+    .shift {
+      padding: 0.95rem 1.25rem;
+      border-bottom: 1px solid var(--bd);
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      transition: background 0.15s ease;
+    }
+    .shift:last-child { border-bottom: none; }
+    .shift:hover { background: var(--bg-page); }
+
+    .shift__top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .shift__q {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--tx-1);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .shift__prob {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--tx-1);
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .shift__prob-sup { font-size: 0.6rem; color: var(--tx-3); }
+    .shift__bot {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .shift__meta { font-size: 11px; color: var(--tx-3); }
+
+    /* High Velocity tag */
+    .vel-tag {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    .vel-tag--up { color: #065F46; background: #F0FDF4; border: 1px solid #A7F3D0; }
+    .vel-tag--dn { color: #7F1D1D; background: #FEF2F2; border: 1px solid #FECACA; }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION I — FOOTER
+    ════════════════════════════════════════════════════════════════════ */
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--bd);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .footer p { font-size: 11px; color: var(--tx-3); line-height: 1.5; }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ════════════════════════════════════════════════════════════════════
+       SECTION J — RESPONSIVE
+    ════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 720px) {
+      .page-wrap    { padding: 1.25rem 1rem 4rem; }
+      .masthead     { flex-direction: column; align-items: flex-start; }
+      .masthead__meta { text-align: left; }
+      .radar-grid   { grid-template-columns: 1fr; }
+      .regions-grid { grid-template-columns: 1fr; }
+      .pillars      { grid-template-columns: 1fr; }
+      .breakdown-header { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrap">
+
+    <!-- ── Masthead ─────────────────────────────────────────────────── -->
+    <header class="masthead">
+      <div>
+        <p class="masthead__eyebrow" id="mastEyebrow">Polymarket Gamma API · Market Overview</p>
+        <h1 class="masthead__title" id="mastTitle">Global Markets</h1>
+      </div>
+      <div class="masthead__meta">
+        <span class="live-dot"></span>Updated just now<br>
+        <span id="mastMeta" class="num">Loading…</span>
+      </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         VIEWS CONTAINER — two siblings; one .view--on at a time
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="views-wrap">
+
+      <!-- VIEW 1: MACRO / GLOBAL MARKETS ─────────────────────────── -->
+      <div class="view view--on" id="viewMacro">
+
+        <!-- ── Domestic Radar ──────────────────────────────────────── -->
+        <section class="radar-section">
+          <div class="radar-head">
+            <div class="radar-head__left">
+              <!-- Radar icon in Sapphire -->
+              <span class="radar-head__icon" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="6.5" cy="6.5" r="2.5" fill="currentColor"/>
+                  <circle cx="6.5" cy="6.5" r="0.9" fill="#FFFFFF"/>
+                </svg>
+              </span>
+              <span class="radar-head__title">Domestic Radar</span>
+              <span class="radar-head__sub">Israel focus · sorted by Impact Score</span>
+            </div>
+            <div class="radar-head__rule"></div>
+          </div>
+          <div class="radar-grid" id="radarGrid">
+            <p class="empty">Loading radar…</p>
+          </div>
+        </section>
+
+        <!-- ── Global Regions ──────────────────────────────────────── -->
+        <div class="sec-head" style="margin-bottom:1rem">
+          <span class="sec-head__title">Global Regions</span>
+          <div class="sec-head__rule"></div>
+          <span class="sec-head__trail" id="regionCount"></span>
+        </div>
+        <div class="regions-grid" id="regionsGrid">
+          <p class="empty">Loading regions…</p>
+        </div>
+
+      </div><!-- /viewMacro -->
+
+      <!-- VIEW 2: REGION BREAKDOWN ────────────────────────────────── -->
+      <div class="view" id="viewBreakdown">
+        <div class="breakdown-header">
+          <button class="breakdown-back" id="backBtn">Back to Global Markets</button>
+          <div style="text-align:right">
+            <p class="breakdown-region" id="bkRegion"></p>
+            <p class="breakdown-sub" id="bkSub"></p>
+          </div>
+        </div>
+        <div class="pillars" id="bkPillars">
+          <!-- Populated by renderBreakdown() -->
+        </div>
+      </div><!-- /viewBreakdown -->
+
+    </div><!-- /views-wrap -->
+
+    <!-- ── Footer ──────────────────────────────────────────────────── -->
+    <footer class="footer">
+      <p>Data: <a href="https://gamma-api.polymarket.com" target="_blank">Polymarket Gamma API</a> (mock). Probabilities reflect crowd consensus — not financial advice.</p>
+      <p>Geopolitical Global Markets · v3 · Warm High-Fidelity</p>
+    </footer>
+
+  </div><!-- /page-wrap -->
+
+
+  <script>
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 1 — EXPANDED MOCK DATA
+     Mirrors the real Polymarket Gamma API shape exactly.
+     Contains 6 Israel-tagged markets (il-*) plus Israel-keyword ME
+     markets that the isIsraelMarket() filter will capture automatically.
+  ══════════════════════════════════════════════════════════════════════ */
+  const MOCK_DATA = { markets: [
+
+    /* ── ISRAEL (Domestic Radar pool) ───────────────────────────────── */
+    {
+      id: "il-001",
+      question: "Will a formal, lasting ceasefire in Gaza be signed before July 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.41,0.59],
+      volume24hr: 360800, liquidity: 870000,
+      region: "Middle East", category: "Conflict",
+      history7d: [0.50,0.47,0.44,0.42,0.39,0.40,0.41], deltaDay: +0.06
+    },
+    {
+      id: "il-002",
+      question: "Will Israel and Saudi Arabia sign a normalization agreement in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.23,0.77],
+      volume24hr: 214900, liquidity: 480000,
+      region: "Middle East", category: "Diplomacy",
+      history7d: [0.28,0.27,0.25,0.24,0.23,0.23,0.23], deltaDay: -0.01
+    },
+    {
+      id: "il-003",
+      question: "Will Iran conduct a direct military strike on Israeli territory before June 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.14,0.86],
+      volume24hr: 193600, liquidity: 410000,
+      region: "Middle East", category: "Conflict",
+      history7d: [0.09,0.10,0.12,0.13,0.14,0.14,0.14], deltaDay: +0.07
+    },
+    {
+      id: "il-004",
+      question: "Will the Israeli coalition government collapse before Q3 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.38,0.62],
+      volume24hr: 182400, liquidity: 390000,
+      region: "Middle East", category: "Politics",
+      history7d: [0.29,0.31,0.33,0.35,0.36,0.37,0.38], deltaDay: +0.04
+    },
+    {
+      id: "il-005",
+      question: "Will a Gaza reconstruction plan receive formal UN Security Council endorsement in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.27,0.73],
+      volume24hr: 156300, liquidity: 340000,
+      region: "Middle East", category: "Diplomacy",
+      history7d: [0.21,0.22,0.24,0.25,0.26,0.27,0.27], deltaDay: +0.02
+    },
+    {
+      id: "il-006",
+      question: "Will Israel and Hezbollah return to large-scale active conflict before mid-2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.19,0.81],
+      volume24hr: 143700, liquidity: 295000,
+      region: "Middle East", category: "Conflict",
+      history7d: [0.22,0.21,0.20,0.19,0.19,0.19,0.19], deltaDay: -0.05
+    },
+
+    /* ── MIDDLE EAST (non-Israel) ─────────────────────────────────── */
+    {
+      id: "me-001",
+      question: "Will the US and Iran reach a new nuclear framework deal in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.18,0.82],
+      volume24hr: 295100, liquidity: 640000,
+      region: "Middle East", category: "Diplomacy",
+      history7d: [0.22,0.21,0.20,0.19,0.18,0.18,0.18], deltaDay: -0.02
+    },
+    {
+      id: "me-002",
+      question: "Will Yemen's Houthi movement cease Red Sea attacks by mid-2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.29,0.71],
+      volume24hr: 156700, liquidity: 340000,
+      region: "Middle East", category: "Conflict",
+      history7d: [0.35,0.33,0.31,0.30,0.29,0.29,0.29], deltaDay: -0.04
+    },
+    {
+      id: "me-003",
+      question: "Will Saudi Arabia announce a domestic political liberalization package in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.22,0.78],
+      volume24hr: 112400, liquidity: 245000,
+      region: "Middle East", category: "Politics",
+      history7d: [0.18,0.19,0.20,0.21,0.22,0.22,0.22], deltaDay: +0.03
+    },
+
+    /* ── EUROPE ──────────────────────────────────────────────────── */
+    {
+      id: "eu-001",
+      question: "Will Ukraine and Russia reach a ceasefire agreement before end of 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.34,0.66],
+      volume24hr: 485200, liquidity: 1240000,
+      region: "Europe", category: "Conflict",
+      history7d: [0.29,0.31,0.30,0.33,0.31,0.34,0.34], deltaDay: +0.03
+    },
+    {
+      id: "eu-002",
+      question: "Will Germany hold snap federal elections before March 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.88,0.12],
+      volume24hr: 371400, liquidity: 920000,
+      region: "Europe", category: "Election",
+      history7d: [0.65,0.72,0.78,0.81,0.85,0.87,0.88], deltaDay: +0.01
+    },
+    {
+      id: "eu-003",
+      question: "Will Emmanuel Macron resign as French President in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.11,0.89],
+      volume24hr: 261700, liquidity: 590000,
+      region: "Europe", category: "Politics",
+      history7d: [0.08,0.09,0.10,0.11,0.11,0.11,0.11], deltaDay: 0
+    },
+    {
+      id: "eu-004",
+      question: "Will NATO invoke Article 5 in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.07,0.93],
+      volume24hr: 238400, liquidity: 510000,
+      region: "Europe", category: "Conflict",
+      history7d: [0.05,0.05,0.06,0.06,0.07,0.07,0.07], deltaDay: 0
+    },
+    {
+      id: "eu-005",
+      question: "Will Finland propose a joint EU defense bond before Q3 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.22,0.78],
+      volume24hr: 148300, liquidity: 320000,
+      region: "Europe", category: "Diplomacy",
+      history7d: [0.14,0.17,0.19,0.20,0.21,0.22,0.22], deltaDay: +0.05
+    },
+
+    /* ── ASIA ─────────────────────────────────────────────────────── */
+    {
+      id: "as-001",
+      question: "Will China conduct military exercises near Taiwan in Q1 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.57,0.43],
+      volume24hr: 318600, liquidity: 760000,
+      region: "Asia", category: "Conflict",
+      history7d: [0.48,0.52,0.55,0.54,0.56,0.58,0.57], deltaDay: -0.01
+    },
+    {
+      id: "as-002",
+      question: "Will the UN Security Council impose new sanctions on North Korea in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.14,0.86],
+      volume24hr: 183300, liquidity: 390000,
+      region: "Asia", category: "Diplomacy",
+      history7d: [0.17,0.16,0.15,0.15,0.14,0.14,0.14], deltaDay: -0.01
+    },
+    {
+      id: "as-003",
+      question: "Will there be a major armed conflict between India and Pakistan in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.09,0.91],
+      volume24hr: 167500, liquidity: 340000,
+      region: "Asia", category: "Conflict",
+      history7d: [0.07,0.08,0.08,0.09,0.09,0.09,0.09], deltaDay: 0
+    },
+    {
+      id: "as-004",
+      question: "Will Japan revise its pacifist constitution to allow offensive military capacity?",
+      outcomes: ["Yes","No"], outcomePrices: [0.31,0.69],
+      volume24hr: 141200, liquidity: 290000,
+      region: "Asia", category: "Politics",
+      history7d: [0.23,0.25,0.27,0.29,0.30,0.31,0.31], deltaDay: +0.07
+    },
+    {
+      id: "as-005",
+      question: "Will South Korea declare a national security emergency in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.18,0.82],
+      volume24hr: 108900, liquidity: 225000,
+      region: "Asia", category: "Politics",
+      history7d: [0.20,0.20,0.19,0.19,0.18,0.18,0.18], deltaDay: -0.03
+    },
+
+    /* ── AMERICAS ────────────────────────────────────────────────── */
+    {
+      id: "am-001",
+      question: "Will Canada hold a federal election before end of April 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.93,0.07],
+      volume24hr: 199200, liquidity: 450000,
+      region: "Americas", category: "Election",
+      history7d: [0.71,0.77,0.83,0.87,0.90,0.92,0.93], deltaDay: +0.01
+    },
+    {
+      id: "am-002",
+      question: "Will a new US-China trade deal be announced in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.31,0.69],
+      volume24hr: 152800, liquidity: 310000,
+      region: "Americas", category: "Diplomacy",
+      history7d: [0.25,0.27,0.29,0.30,0.31,0.31,0.31], deltaDay: 0
+    },
+    {
+      id: "am-003",
+      question: "Will Venezuela hold internationally-recognised elections before 2026?",
+      outcomes: ["Yes","No"], outcomePrices: [0.19,0.81],
+      volume24hr: 134600, liquidity: 265000,
+      region: "Americas", category: "Election",
+      history7d: [0.22,0.21,0.20,0.20,0.19,0.19,0.19], deltaDay: -0.05
+    },
+    {
+      id: "am-004",
+      question: "Will the US invoke the Monroe Doctrine formally in any Latin American conflict in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.06,0.94],
+      volume24hr: 98400, liquidity: 190000,
+      region: "Americas", category: "Diplomacy",
+      history7d: [0.04,0.04,0.05,0.05,0.06,0.06,0.06], deltaDay: +0.04
+    },
+
+    /* ── GLOBAL ──────────────────────────────────────────────────── */
+    {
+      id: "gl-001",
+      question: "Will a G7 summit produce a unified AI governance treaty in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.16,0.84],
+      volume24hr: 221300, liquidity: 500000,
+      region: "Global", category: "Diplomacy",
+      history7d: [0.12,0.13,0.14,0.15,0.15,0.16,0.16], deltaDay: +0.02
+    },
+    {
+      id: "gl-002",
+      question: "Will a UN peacekeeping force be deployed to a new active conflict zone in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.38,0.62],
+      volume24hr: 174900, liquidity: 380000,
+      region: "Global", category: "Conflict",
+      history7d: [0.32,0.33,0.35,0.36,0.37,0.38,0.38], deltaDay: +0.03
+    },
+    {
+      id: "gl-003",
+      question: "Will global crude oil prices exceed $120/barrel at any point in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.27,0.73],
+      volume24hr: 143500, liquidity: 295000,
+      region: "Global", category: "Economics",
+      history7d: [0.30,0.29,0.28,0.28,0.27,0.27,0.27], deltaDay: -0.02
+    },
+    {
+      id: "gl-004",
+      question: "Will a major undersea cable sabotage be attributed to a state actor in 2025?",
+      outcomes: ["Yes","No"], outcomePrices: [0.21,0.79],
+      volume24hr: 109800, liquidity: 225000,
+      region: "Global", category: "Conflict",
+      history7d: [0.14,0.15,0.17,0.18,0.20,0.21,0.21], deltaDay: +0.08
+    }
+  ]};
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 2 — DATA LAYER
+  ══════════════════════════════════════════════════════════════════════ */
+
+  /*
+   * Israel keyword filter — identifies markets for the Domestic Radar.
+   * Also matches markets whose id begins with "il-" for explicit tagging.
+   */
+  const ISRAEL_KEYS = [
+    'israel','israeli','idf','netanyahu','gaza','hamas',
+    'hezbollah','west bank','tel aviv','beirut'
+  ];
+
+  function isIsraelMarket(m) {
+    if (m.id && m.id.startsWith('il-')) return true;
+    const q = m.question.toLowerCase();
+    return ISRAEL_KEYS.some(k => q.includes(k));
+  }
+
+  /*
+   * Impact Score — surfaces the most interesting and fast-moving events.
+   *
+   * Formula:
+   *   capitalWeight = log₁₊(totalCapital / $1K)   ← log-normalised to prevent
+   *                                                   mega-cap dominance
+   *   velocityMultiplier = 1 + |deltaDay| × 20     ← each 1% daily swing
+   *                                                   adds 20% to the score
+   *   impactScore = capitalWeight × velocityMultiplier
+   *
+   * Example comparison:
+   *   $1M capital,  5% delta  → log(1001) × 2.0  ≈ 13.8
+   *   $2M capital,  0% delta  → log(2001) × 1.0  ≈  7.6
+   *   $500K capital, 8% delta → log(501)  × 2.6  ≈ 16.2   ← surfaces first
+   */
+  function impactScore(m) {
+    const capitalWeight      = Math.log1p((m.liquidity + m.volume24hr) / 1000);
+    const velocityMultiplier = 1 + Math.abs(m.deltaDay) * 20;
+    return capitalWeight * velocityMultiplier;
+  }
+
+  /* Parse and normalise a raw Polymarket Gamma API response */
+  function parsePayload(raw) {
+    const GEO_KEYS = [
+      'election','ceasefire','conflict','diplomacy','war','peace','nato',
+      'sanction','nuclear','military','coup','deal','invasion','missile',
+      'treaty','summit','alliance','russia','ukraine','china','iran',
+      'israel','taiwan','india','pakistan','korea','oil','cable',
+      'venezuela','japan','houthi','governance','peacekeeping','hamas',
+      'gaza','hezbollah','saudi','ukraine','eu ','un '
+    ];
+
+    return (raw.markets || [])
+      .filter(m => {
+        const q = (m.question || '').toLowerCase();
+        const c = (m.category || '').toLowerCase();
+        return GEO_KEYS.some(k => q.includes(k) || c.includes(k));
+      })
+      .map(m => ({
+        id:         m.id,
+        question:   m.question,
+        outcomes:   m.outcomes      || ['Yes','No'],
+        prices:     m.outcomePrices || [0.5, 0.5],
+        volume24hr: m.volume24hr    || 0,
+        liquidity:  m.liquidity     || 0,
+        region:     m.region        || 'Global',
+        category:   m.category      || 'Event',
+        history7d:  m.history7d     || [],
+        deltaDay:   m.deltaDay      || 0
+      }));
+  }
+
+  /*
+   * splitMarkets — separates Israel markets from the global pool.
+   * Israel markets are sorted by Impact Score for Domestic Radar display.
+   * The global remainder is passed to groupByRegion.
+   */
+  function splitMarkets(markets) {
+    const israelMarkets = markets
+      .filter(isIsraelMarket)
+      .sort((a, b) => impactScore(b) - impactScore(a));
+
+    const globalMarkets = markets.filter(m => !isIsraelMarket(m));
+
+    return { israelMarkets, globalMarkets };
+  }
+
+  /*
+   * groupByRegion — groups global markets by region.
+   * Returns Map<name, { markets[], totalVolume, highestLiquidity }>
+   * sorted by aggregate 24h volume descending.
+   */
+  function groupByRegion(markets) {
+    const map = new Map();
+
+    for (const m of markets) {
+      if (!map.has(m.region)) {
+        map.set(m.region, { markets: [], totalVolume: 0, highestLiquidity: null });
+      }
+      const g = map.get(m.region);
+      g.markets.push(m);
+      g.totalVolume += m.volume24hr;
+      if (!g.highestLiquidity || m.liquidity > g.highestLiquidity.liquidity) {
+        g.highestLiquidity = m;
+      }
+    }
+
+    return new Map([...map.entries()].sort((a, b) => b[1].totalVolume - a[1].totalVolume));
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 3 — SVG SPARKLINE (PRESERVED VERBATIM + color parameter)
+     All curve math is unchanged. Stroke/fill now parameterized.
+  ══════════════════════════════════════════════════════════════════════ */
+  function buildSparkline(history, w, h, color = '#2563EB') {
+    if (!history || history.length < 2) return '';
+
+    const n     = history.length;
+    const minV  = Math.min(...history);
+    const maxV  = Math.max(...history);
+    const range = maxV - minV || 0.01;   /* guard: flat series */
+
+    const PAD = 4;
+    const pts = history.map((v, i) => ({
+      x: (i / (n - 1)) * w,
+      y: PAD + (1 - (v - minV) / range) * (h - PAD * 2)
+    }));
+
+    /* Smooth cubic Bezier through each consecutive pair */
+    let d = `M ${pts[0].x},${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i], p1 = pts[i + 1];
+      const cx = (p0.x + p1.x) / 2;
+      d += ` C ${cx},${p0.y} ${cx},${p1.y} ${p1.x},${p1.y}`;
+    }
+
+    const areaD = d + ` L ${pts[n-1].x},${h} L ${pts[0].x},${h} Z`;
+    const uid   = Math.random().toString(36).slice(2, 7);
+
+    return `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"
+           role="img" aria-label="7-day probability trend sparkline">
+        <defs>
+          <linearGradient id="sg${uid}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="${color}" stop-opacity="0.14"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="${areaD}" fill="url(#sg${uid})"/>
+        <path d="${d}" fill="none" stroke="${color}"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="${pts[n-1].x}" cy="${pts[n-1].y}"
+                r="2.5" fill="${color}" fill-opacity="0.85"/>
+      </svg>`;
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 4 — SHARED RENDERING HELPERS
+  ══════════════════════════════════════════════════════════════════════ */
+
+  function fmtVol(v) {
+    if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+    if (v >= 1_000)     return `$${(v / 1_000).toFixed(0)}K`;
+    return `$${v}`;
+  }
+
+  /* Delta chip — monospaced, colour-coded, directional symbol */
+  function mkDelta(d) {
+    if (d > 0.001)  return `<span class="delta delta--up">↑ +${(d * 100).toFixed(1)}%</span>`;
+    if (d < -0.001) return `<span class="delta delta--dn">↓ ${(d * 100).toFixed(1)}%</span>`;
+    return `<span class="delta delta--nt">—</span>`;
+  }
+
+  /* Leading outcome helpers */
+  function lead(m) {
+    const i = m.prices[0] >= m.prices[1] ? 0 : 1;
+    return { i, name: m.outcomes[i], prob: m.prices[i] };
+  }
+
+  function mkPills(m) {
+    const li = lead(m).i;
+    return m.outcomes.map((name, i) => {
+      const pct = (m.prices[i] * 100).toFixed(0);
+      return `<span class="${i === li ? 'pill pill--lead' : 'pill'}">${name} <span class="num">${pct}%</span></span>`;
+    }).join('');
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 5 — RENDER: DOMESTIC RADAR
+     Renders Israel-focus markets sorted by Impact Score.
+     Top 40% of score range receives the "High Impact" badge.
+  ══════════════════════════════════════════════════════════════════════ */
+  function renderRadar(markets) {
+    const grid = document.getElementById('radarGrid');
+
+    if (!markets.length) {
+      grid.innerHTML = `<p class="empty">No Israel-focus markets available.</p>`;
+      return;
+    }
+
+    const scores   = markets.map(impactScore);
+    const maxScore = Math.max(...scores);
+    const threshold = maxScore * 0.60;   /* top 40% of range = High Impact */
+
+    grid.innerHTML = markets.map((m, idx) => {
+      const { prob } = lead(m);
+      const isHigh   = scores[idx] >= threshold;
+      const spark    = buildSparkline(m.history7d, 220, 34);
+
+      return `
+        <div class="radar-card">
+          <div class="radar-card__top">
+            <span class="badge">${m.category}</span>
+            ${isHigh ? `<span class="impact-badge">High Impact</span>` : ''}
+          </div>
+
+          <p class="radar-card__q">${m.question}</p>
+
+          <div class="radar-card__prob-row">
+            <span class="radar-card__prob">
+              ${(prob * 100).toFixed(0)}<span class="radar-card__prob-sup">%</span>
+            </span>
+            ${mkDelta(m.deltaDay)}
+          </div>
+
+          <div class="radar-card__spark">${spark}</div>
+
+          <div class="radar-card__foot">
+            <div class="stat">
+              <span class="stat__lbl">24h Vol</span>
+              <span class="stat__val">${fmtVol(m.volume24hr)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__lbl">Liquidity</span>
+              <span class="stat__val">${fmtVol(m.liquidity)}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 6 — RENDER: REGION CARDS (Macro View)
+  ══════════════════════════════════════════════════════════════════════ */
+  function renderRegions(groups) {
+    const grid = document.getElementById('regionsGrid');
+
+    if (!groups.size) {
+      grid.innerHTML = `<p class="empty">No regional markets available.</p>`;
+      return;
+    }
+
+    let idx = 0, html = '';
+
+    for (const [region, g] of groups) {
+      idx++;
+      const hlQ = g.highestLiquidity ? g.highestLiquidity.question : '—';
+
+      html += `
+        <div class="region-card" data-region="${region}"
+             role="button" tabindex="0"
+             aria-label="Open ${region} breakdown">
+
+          <!-- Monospace watermark index — decorative only -->
+          <span class="region-card__idx" aria-hidden="true">${String(idx).padStart(2,'0')}</span>
+
+          <p class="region-card__count">${g.markets.length} market${g.markets.length !== 1 ? 's' : ''}</p>
+          <h2 class="region-card__name">${region}</h2>
+          <div class="region-card__divider"></div>
+
+          <p class="region-card__vol-lbl">Aggregate 24h Volume</p>
+          <p class="region-card__vol">${fmtVol(g.totalVolume)}</p>
+
+          <p class="region-card__hl-lbl">Highest Liquidity</p>
+          <p class="region-card__hl-q">${hlQ}</p>
+
+          <button class="region-card__cta" data-region="${region}">View Breakdown</button>
+        </div>`;
+    }
+
+    grid.innerHTML = html;
+    document.getElementById('regionCount').textContent = `${groups.size} regions`;
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 7 — RENDER: REGION BREAKDOWN
+     Primary Markets   = top 2 by Impact Score
+     Significant Shifts = rest, sorted by |deltaDay| desc, with High Velocity tag
+  ══════════════════════════════════════════════════════════════════════ */
+  function renderBreakdown(region, group) {
+    const { markets, totalVolume } = group;
+
+    /* Masthead / header updates */
+    document.getElementById('bkRegion').textContent  = `${region} — Region Breakdown`;
+    document.getElementById('bkSub').textContent     = `${markets.length} markets · ${fmtVol(totalVolume)} aggregate 24h vol`;
+    document.getElementById('mastEyebrow').textContent = `${region} · Region Breakdown`;
+
+    /* Segment by Impact Score */
+    const ranked  = [...markets].sort((a, b) => impactScore(b) - impactScore(a));
+    const primary = ranked.slice(0, 2);
+    const shifts  = ranked.slice(2).sort((a, b) => Math.abs(b.deltaDay) - Math.abs(a.deltaDay));
+
+    /* ── Pillar A: Primary Markets ─────────────────────────────────── */
+    const pillarA = primary.map(m => {
+      const l     = lead(m);
+      const spark = buildSparkline(m.history7d, 280, 50);
+      return `
+        <div class="primary">
+          <div class="primary__top">
+            <span class="badge">${m.category}</span>
+            ${mkDelta(m.deltaDay)}
+          </div>
+          <span class="primary__prob">
+            ${(l.prob * 100).toFixed(0)}<span class="primary__prob-sup">%</span>
+          </span>
+          <div class="primary__spark">${spark}</div>
+          <p class="primary__q">${m.question}</p>
+          <div class="primary__pills">${mkPills(m)}</div>
+          <div class="primary__stats">
+            <div class="stat">
+              <span class="stat__lbl">24h Vol</span>
+              <span class="stat__val">${fmtVol(m.volume24hr)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__lbl">Liquidity</span>
+              <span class="stat__val">${fmtVol(m.liquidity)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat__lbl">Leading</span>
+              <span class="stat__val" style="color:var(--tx-1)">${l.name}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    /* ── Pillar B: Significant Shifts ──────────────────────────────── */
+    let pillarB = '';
+
+    if (!shifts.length) {
+      pillarB = `<p class="empty" style="padding:2rem 1.25rem">All markets shown in Primary Markets.</p>`;
+    } else {
+      pillarB = shifts.map(m => {
+        const l      = lead(m);
+        const absD   = Math.abs(m.deltaDay);
+        /* High Velocity fires at ≥3% absolute daily shift */
+        const velTag = absD >= 0.03
+          ? `<span class="vel-tag ${m.deltaDay > 0 ? 'vel-tag--up' : 'vel-tag--dn'}">
+               ${m.deltaDay > 0 ? '↑' : '↓'} High Velocity
+             </span>`
+          : '';
+
+        return `
+          <div class="shift">
+            <div class="shift__top">
+              <p class="shift__q">${m.question}</p>
+              <span class="shift__prob">
+                ${(l.prob * 100).toFixed(0)}<span class="shift__prob-sup">%</span>
+              </span>
+            </div>
+            <div class="shift__bot">
+              ${mkDelta(m.deltaDay)}
+              ${velTag}
+              <span class="shift__meta">${m.category} · ${fmtVol(m.volume24hr)}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    /* Inject both pillars */
+    document.getElementById('bkPillars').innerHTML = `
+      <div class="pillar">
+        <div class="pillar__head">
+          <span class="pillar__title">Primary Markets</span>
+          <span class="pillar__sub">Highest Impact Score</span>
+        </div>
+        ${pillarA}
+      </div>
+
+      <div class="pillar">
+        <div class="pillar__head">
+          <span class="pillar__title">Significant Shifts</span>
+          <span class="pillar__sub">Fastest probability velocity</span>
+        </div>
+        ${pillarB}
+      </div>`;
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 8 — STATE MACHINE (PRESERVED MECHANICS)
+     CSS handles all transitions; JS only swaps the .view--on class.
+  ══════════════════════════════════════════════════════════════════════ */
+
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('view--on'));
+    /* Brief offset lets the outgoing view fade before the incoming one appears */
+    setTimeout(() => document.getElementById(id).classList.add('view--on'), 120);
+  }
+
+  function openBreakdown(region) {
+    const group = REGION_GROUPS.get(region);
+    if (!group) return;
+    renderBreakdown(region, group);
+    showView('viewBreakdown');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openMacro() {
+    document.getElementById('mastEyebrow').textContent = 'Polymarket Gamma API · Market Overview';
+    showView('viewMacro');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     MODULE 9 — INITIALISATION
+  ══════════════════════════════════════════════════════════════════════ */
+
+  /* Parse → split → group */
+  const ALL_MARKETS    = parsePayload(MOCK_DATA);
+  const { israelMarkets, globalMarkets } = splitMarkets(ALL_MARKETS);
+  const REGION_GROUPS  = groupByRegion(globalMarkets);
+
+  /* Initial renders */
+  renderRadar(israelMarkets);
+  renderRegions(REGION_GROUPS);
+
+  /* Live masthead meta */
+  document.getElementById('mastMeta').textContent =
+    `${israelMarkets.length} Radar · ${REGION_GROUPS.size} Regions · ${ALL_MARKETS.length} Markets`;
+
+  /* Region card interactions — delegated to grid container */
+  document.getElementById('regionsGrid').addEventListener('click', e => {
+    const card = e.target.closest('[data-region]');
+    if (card) openBreakdown(card.dataset.region);
+  });
+
+  document.getElementById('regionsGrid').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const card = e.target.closest('[data-region]');
+      if (card) { e.preventDefault(); openBreakdown(card.dataset.region); }
+    }
+  });
+
+  /* Back button */
+  document.getElementById('backBtn').addEventListener('click', openMacro);
+
+  </script>
+</body>
+</html>
